@@ -4,7 +4,8 @@ from PIL import Image
 
 parser = argparse.ArgumentParser(description='Resizes images')
 parser.add_argument('--path', metavar='P', type=str, dest='path',
-                    help='filepath to image to be resized', required=True)
+                    help='filepath to directory where images are to be resized',
+                    required=True)
 parser.add_argument('--width', metavar='W', type=int, dest='width',
                     help='width to resize image to', required=True)
 parser.add_argument('--height', metavar='H', type=int, dest='height',
@@ -16,20 +17,20 @@ path = args.path
 width = args.width
 height = args.height
 
-parsed_path = os.path.normpath(path)
-parsed_path = parsed_path.split(os.sep)
-print(parsed_path)
+for file in os.listdir(path):
+    filepath = os.path.join(path, file)
+    try:
+        image = Image.open(filepath)
+        basename_without_ext = os.path.splitext(os.path.basename(filepath))[0]
+    except OSError as e:
+        print('Could not open file')
 
-try:
-    image = Image.open(path)
-except OSError as e:
-    print('Could not open file')
+    try:
+        new_image = image.resize((width, height))
+        format = image.format
+        new_image.save(f'{basename_without_ext}_{width}x{height}.{format}')
+        print('image resized')
+    except Exception:
+        print('could not save file')
 
-try:
-    new_image = image.resize((width, height))
-    format = image.format
-    new_image.save(f'image_{width}x{height}.{format}')
-    print('done')
-except Exception:
-    print('could not save file')
-
+print('done')
